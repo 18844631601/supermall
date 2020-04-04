@@ -30,8 +30,7 @@
         text-align: center;
         font-size: 12px;
         padding: 8px 0;
-        /*border-bottom: 2px solid #f2f2f2;*/
-        box-shadow: 0 1px 1px rgba(100,100,100,.1);
+        border-bottom: 1px solid #f2f2f2;
     }
     .recommend-item{
         flex: 1;
