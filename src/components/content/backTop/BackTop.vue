@@ -11,13 +11,15 @@
 </script>
 
 <style scoped>
-.back-top{
-    position: fixed;
-    bottom: 60px;
-    right: 20px;
-}
-.back-top img{
-    width: 43px;
-    height: 43px;
-}
+    .back-top {
+        position: fixed;
+        bottom: 60px;
+        right: 20px;
+        z-index: 15;
+    }
+
+    .back-top img {
+        width: 43px;
+        height: 43px;
+    }
 </style>

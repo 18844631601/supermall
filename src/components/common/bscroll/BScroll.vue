@@ -12,11 +12,11 @@
     export default {
         name: "BScroll",
         props: {
-            probeType:{
+            probeType: {
                 type: Number,
                 default: 0
             },
-            pullUpLoad:{
+            pullUpLoad: {
                 type: Boolean,
                 default: false
             }
@@ -36,10 +36,7 @@
                 this.$emit('scroll', position);
             });
             this.scroll.on('pullingUp', () => {
-                // console.log('pullingUp');
-                // setTimeout(()=>{
-                //     this.scroll.finishPullUp()
-                // }, 2000);
+                // console.log('pull');
                 this.$emit('pullingUp')
             });
         },
@@ -47,10 +44,16 @@
             scrollTo(x, y, time = 300) {
                 this.scroll.scrollTo(x, y, time)
             },
-            finishPullUp(){
-                setTimeout(()=>{
+            finishPullUp() {
+                setTimeout(() => {
                     this.scroll.finishPullUp()
                 }, 2000);
+            },
+            refresh() {
+                this.scroll.refresh()
+            },
+            getScrollY() {
+                return this.scroll ? this.scroll.y : 0;
             }
         }
 

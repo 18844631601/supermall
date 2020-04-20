@@ -3,12 +3,13 @@
         <nav-bar class="home-nav">
             <div slot="center">购物街</div>
         </nav-bar>
-        <b-scroll class="home-scroll" ref="scroll" @scroll="showBackTop" :probe-type="3" :pull-up-load="true"
+        <tab-control :titles="titles" @itemClick="itemClick" ref="tabControl1" class="tab-control" v-show="isTabFixed"/>
+        <b-scroll class="home-scroll" ref="scroll" @scroll="scroll" :probe-type="3" :pull-up-load="true"
                   @pullingUp="loadMore">
-            <home-swiper :banner="banner"/>
+            <home-swiper :banner="banner" @swiperImgLoad="swiperImgLoad"/>
             <home-recommend :recommend="recommend"/>
             <home-feature/>
-            <tab-control :titles="titles" class="tab-control" @itemClick="itemClick"/>
+            <tab-control :titles="titles" @itemClick="itemClick" ref="tabControl2"/>
             <goods-list :goods="showGoods"/>
         </b-scroll>
         <back-top @click.native="backTop" v-show="isShowBackTop"/>
@@ -25,9 +26,11 @@
     import TabControl from 'components/content/tabControl/TabControl'
     import GoodsList from 'components/content/goods/GoodsList'
     import BScroll from 'components/common/bscroll/BScroll'
-    import BackTop from 'components/content/backTop/BackTop'
 
     import {getHomeMutidata, getHomeGoods} from 'network/home'
+
+    import {itemImgLoadMixin, backTopMixin} from "common/mixins";
+    import {BACK_POSITION} from "common/const";
 
     export default {
         name: "Home",
@@ -39,7 +42,6 @@
             TabControl,
             GoodsList,
             BScroll,
-            BackTop,
         },
         data() {
             return {
@@ -49,18 +51,62 @@
                 goods: {
                     "pop": {
                         page: 0, list: [{
+                            iid: 111,
                             cfav: 466,
                             img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
                             link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
                             price: 108.5,
                             title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
                         }, {
+                            iid: 222,
                             cfav: 466,
                             img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
                             link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
                             price: 108.5,
                             title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
-                        }]
+                        }, {
+                            iid: 111,
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            iid: 222,
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            iid: 111,
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            iid: 222,
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            iid: 111,
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            iid: 222,
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        },]
                     },
                     "news": {
                         page: 0, list: [{
@@ -114,11 +160,37 @@
                             link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
                             price: 108.5,
                             title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
+                        }, {
+                            cfav: 466,
+                            img: "https://s5.mogucdn.com/mlcdn/c45406/190817_7bfbc11kicca4fe2fgic954ikhhfj_640x960.jpg",
+                            link: "https://h5.mogu.com/detail-normal/index.html?itemId=1mk63ma&acm=3.ms.1_4_1mk63ma.46.36620-68998.e6MRRrUTAKG5E.sd_117-swt_46-imt_6-c_1_17_545809170_0_0_3-t_e6MRRrUTAKG5E-lc_17-pit_1-qid_37010-dit_167&cparam=MTU4NTczMTI1N18xMWtfMDA2ZDc5MzRkMTc5MzI4MWY0NTJhMWY1YWQ0NjRkMGVfMTdfMF81NDU4MDkxNzBfNGY4Zl8wXzBfMF83ODFfMV8zX2xvYy0w",
+                            price: 108.5,
+                            title: "外套男士潮牌春季2020新款潮少年衣服男装韩版潮流工装夹克男"
                         }]
                     },
                 },
                 currentType: 'pop',
-                isShowBackTop: false,
+                tabOffsetTop: 0,
+                isTabFixed: false,
+                saveY: 0,
             }
         },
         computed: {
@@ -126,14 +198,26 @@
                 return this.goods[this.currentType].list
             }
         },
+        activated() {
+            // console.log('act'+this.saveY);
+            this.$refs.scroll.refresh()
+            this.$refs.scroll.scrollTo(0, this.saveY, 0)
+        },
+        deactivated() {
+            this.saveY = this.$refs.scroll.getScrollY()
+            // console.log('deact'+this.saveY);
+            this.$bus.$off('itemImgLoad', this.itemImgListener)
+        },
         created() {
             //获取多种数据
             this.getHomeMutidata();
+
             //获取商品数据
             // this.getHomeGoods("pop");
             // this.getHomeGoods("news");
             // this.getHomeGoods("sell");
         },
+        mixins: [itemImgLoadMixin, backTopMixin],
         methods: {
             /*
             * 事件监听
@@ -150,18 +234,24 @@
                         this.currentType = 'sell';
                         break;
                 }
+                this.$refs.tabControl1.currentIndex = index;
+                this.$refs.tabControl2.currentIndex = index;
             },
-            backTop() {
-                this.$refs.scroll.scrollTo(0, 0)
-            },
-            showBackTop(position) {
-                this.isShowBackTop = position.y <= -350
+            scroll(position) {
+                //判断backTop是否显示
+                this.listenerShowBackTop(position);
+                //判断是否吸顶
+                this.isTabFixed = position.y <= -this.tabOffsetTop
             },
             loadMore() {
                 console.log('loadMore');
                 // this.getHomeGoods(this.currentType);
-                //自动刷新计算高度，防止卡bug拉不下去
-                this.$refs.scroll.scroll.refresh()
+            },
+            swiperImgLoad() {
+                //获取tabControl的offsetTop
+                //所有组件都有一个属性$el,用于获取组建中元素
+                this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
+                // console.log(this.tabOffsetTop);
             },
             /*
             * 网络请求
@@ -187,9 +277,9 @@
     }
 </script>
 
+
 <style scoped>
     #home {
-        /*padding-top: 44px;*/
         height: 100vh;
         position: relative;
     }
@@ -197,16 +287,23 @@
     .home-nav {
         background: var(--color-tint);
         color: white;
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        z-index: 1;
+
+        /*原生滚动采用*/
+        /*position: fixed;*/
+        /*left: 0;*/
+        /*right: 0;*/
+        /*top: 0;*/
+        /*z-index: 1;*/
     }
 
+    /*.tab-control {*/
+    /*position: sticky; !*粘性定位*!*/
+    /*top: 44px;*/
+    /*}*/
+
     .tab-control {
-        position: sticky; /*粘性定位*/
-        top: 44px;
+        position: relative;
+        z-index: 10;
     }
 
     /*.home-scroll{*/
